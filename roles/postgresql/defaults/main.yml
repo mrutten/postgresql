@@ -1,0 +1,8 @@
+---
+listen_addresses: "localhost"
+client_connection: "host"
+client_database: "all"
+client_user: "all"
+client_address: "127.0.0.1"
+admin_user: "dba"
+admin_password: "passw0rd"
