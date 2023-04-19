@@ -1,0 +1,41 @@
+---
+- name: Collect settings info
+  become_user: postgres
+  community.postgresql.postgresql_info:
+    filter:
+    - "settings"
+  register: settings
+  tags:
+    - set-facts
+
+- name: Set config_file
+  ansible.builtin.set_fact: 
+    config_file: "{{ settings.settings.config_file.setting }}"
+  tags:
+    - set-facts
+
+- name: Set pg_hba
+  ansible.builtin.set_fact: 
+    pg_hba: "{{ settings.settings.hba_file.setting }}"
+  tags:
+    - set-facts
+
+- name: Configure listen addresses
+  ansible.builtin.lineinfile:
+    path: "{{ config_file }}"
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '*'"
+  notify: Restart PostgreSQL
+  tags:
+    - listen-addresses
+
+- name: Configure pg_hba
+  ansible.builtin.blockinfile:
+    path: "{{ pg_hba }}"
+    insertafter: EOF
+    block: |
+      # IPv4 remote connections:
+      host    all             all             0.0.0.0/0               md5
+  notify: Restart PostgreSQL
+  tags:
+    - pg-hba

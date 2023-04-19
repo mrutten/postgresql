@@ -1,0 +1,7 @@
+---
+- name: DBA user
+  hosts: dbservers
+  become: true
+  gather_facts: true
+  roles:
+    - dba
