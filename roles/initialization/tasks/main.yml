@@ -2,19 +2,35 @@
 # Debian PostgreSQL installation automatically calls initdb i.e. it initializes the cluster with default encoding and locale. 
 # To change the locale (and possibly other options in initdb), delete the existing default cluster and create a new one.
 
-- name: Check PostgreSQL initialization
+- name: Check PostgreSQL initialization for Suse
+  ansible.builtin.stat:
+    path: /var/lib/pgsql/data
+  register: pg_initialized_suse
+  when: ansible_facts['os_family'] == 'Suse'
+  tags:
+    - initialization-suse
+
+- name: Initialize PostgreSQL for Suse
+  become_user: postgres
+  ansible.builtin.shell: initdb /var/lib/pgsql/data
+  when: (ansible_facts['os_family'] == 'Suse') and not (pg_initialized_suse.stat.exists)
+  tags:
+    - initialization-suse
+
+- name: Check PostgreSQL initialization for CentOS / RHEL
   ansible.builtin.find:
     path: /var/lib/pgsql/data
-  register: pg_initialized
+  register: pg_initialized_rhel
   when: ansible_facts['os_family'] == 'RedHat'
   tags:
-    - initialization
+    - initialization-rhel
 
 - name: Initialize PostgreSQL
+  become_user: postgres
   ansible.builtin.shell: postgresql-setup --initdb
-  when: (ansible_facts['os_family'] == 'RedHat') and (pg_initialized.matched == 0)
+  when: (ansible_facts['os_family'] == 'RedHat') and (pg_initialized_rhel.matched == 0)
   tags:
-    - initialization
+    - initialization-rhel
 
 - name: Start and enable PostgreSQL
   ansible.builtin.systemd:

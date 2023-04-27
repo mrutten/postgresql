@@ -1,33 +1,47 @@
 ---
-- name: Install PostgreSQL for Debian
+- name: Install PostgreSQL for Debian / Ubuntu
   ansible.builtin.apt:
     name: "{{ item }}"
     state: present
     update_cache: true
   with_items:
     - acl
-    - postgresql-13
-    - postgresql-client-13
+    - postgresql
+    - postgresql-client
     - python3-psycopg2
   when: ansible_facts['os_family'] == 'Debian'
   tags:
     - installation-debian
 
+- name: Install PostgreSQL for Suse
+  ansible.builtin.zypper:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  with_items:
+    - postgresql15-server
+    - postgresql15
+    - python3-psycopg2
+  when: ansible_facts['os_family'] == 'Suse'
+  tags:
+    - installation-suse
+
 - name: Import Centos Official (workaround for https://bugzilla.redhat.com/show_bug.cgi?id=2184640)
   ansible.builtin.rpm_key:
     state: present
     key: /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
-  when: ansible_facts['os_family'] == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution'] == "CentOS"
   tags:
     - installation-redhat
 
-- name: Install PostgreSQL for Centos
+- name: Install PostgreSQL for Centos / RHEL
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
     update_cache: true
   with_items:
     - postgresql-server
+    - postgresql
     - python3-psycopg2
   when: ansible_facts['os_family'] == 'RedHat'
   tags:

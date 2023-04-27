@@ -25,7 +25,7 @@
     path: "{{ config_file }}"
     regexp: "^#?listen_addresses"
     line: "listen_addresses = '*'"
-  notify: Restart PostgreSQL
+  notify: restart postgresql
   tags:
     - listen-addresses
 
@@ -36,6 +36,6 @@
     block: |
       # IPv4 remote connections:
       host    all             all             0.0.0.0/0               md5
-  notify: Restart PostgreSQL
+  notify: restart postgresql
   tags:
     - pg-hba
