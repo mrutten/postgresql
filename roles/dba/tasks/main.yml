@@ -1,7 +1,7 @@
 ---
 - name: Generate DBA password
   # MD5 password has to be salted by concatenating password username
-  ansible.builtin.shell: "echo md5$(echo -n 'passworddba' | md5sum | awk '{print $1}')"
+  ansible.builtin.shell: "echo md5$(echo -n '{{ dba_password }}{{ dba_user }}' | md5sum | awk '{print $1}')"
   register: dba_password_hash
   changed_when: false
   tags:
